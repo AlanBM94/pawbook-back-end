@@ -1,9 +1,18 @@
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
+const animalRouter = require("./routes/animalRoutes");
 
-app.use("/", (req, res) => {
-  res.json({
-    message: "Hello World",
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(bodyParser.json());
+
+app.use("/api/v1/animals", animalRouter);
+
+app.use("*", (req, res) => {
+  res.status(404).json({
+    status: "fail",
+    message: "Not existing route",
   });
 });
 

@@ -16,7 +16,7 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("Database conected with Atlas"));
+  .then(() => console.log("Database connected with Atlas"));
 
 app.listen(3000, () => {
   console.log("App listening on port 3000");
