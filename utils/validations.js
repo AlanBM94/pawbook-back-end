@@ -9,6 +9,7 @@ const checkValidations = (value, valueType) => {
     if (valueType === "number")
       callback = check(value, errorMessage).isNumeric();
     if (valueType === "url") callback = check(value, errorMessage).isURL();
+    if (valueType === "email") callback = check(value, errorMessage).isEmail();
     return callback;
   };
 
@@ -34,4 +35,22 @@ module.exports = {
     checkValidations("picture", "string"),
   ],
   isAValidObjectId: (id) => id.match(/^[0-9a-fA-F]{24}$/),
+  signUpValidations: [
+    checkValidations("user", "string"),
+    checkValidations("email", "email"),
+    checkValidations("password", "string"),
+    checkValidations("passwordConfirm", "string"),
+  ],
+  updateUserValidations: [
+    checkValidations("user", "string"),
+    checkValidations("email", "email"),
+  ],
+  updatePasswordValidations: [
+    checkValidations("password", "string"),
+    checkValidations("passwordConfirm", "string"),
+  ],
+  logInValidations: [
+    checkValidations("email", "email"),
+    checkValidations("password", "string"),
+  ],
 };

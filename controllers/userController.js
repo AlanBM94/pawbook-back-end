@@ -1,4 +1,7 @@
 const User = require("./../models/userModel");
+const { validationResult } = require("express-validator");
+const { isAValidObjectId } = require("../utils/validations");
+const sendError = require("./../utils/appError");
 const jwt = require("jsonwebtoken");
 
 const signToken = (id) => {
@@ -21,26 +24,99 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-exports.createUser = async (req, res) => {
+exports.signUp = async (req, res) => {
   const userInfo = req.body;
 
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   if (userInfo.password !== userInfo.passwordConfirm) {
-    return res.status(400).json({
-      status: "fail",
-      data: "Passwords are not the same",
-    });
+    return res.status(400).json(sendError("Passwords are not the same", 400));
   }
 
   const user = await User.find({ email: userInfo.email });
 
   if (user.length > 0) {
-    return res.status(400).json({
-      status: "fail",
-      data: "User with that email already exists",
-    });
+    return res
+      .status(409)
+      .json(sendError("User with that email already exists", 409));
   }
 
   const newUser = await User.create(userInfo);
 
-  createSendToken(newUser, 200, res);
+  createSendToken(newUser, 201, res);
+};
+
+exports.logIn = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return res.status(401).json(sendError("Incorrect email or password", 401));
+  }
+
+  createSendToken(user, 200, res);
+};
+
+exports.getUserById = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!isAValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(sendError(`${id} is not a valid ObjectId`, 400));
+  }
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    res.status(404).json(sendError("User not found with that id", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: user,
+  });
+};
+
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  if (!isAValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(sendError(`${id} is not a valid ObjectId`, 400));
+  }
+
+  const userInfo = req.body;
+
+  const user = await User.findByIdAndUpdate(id, userInfo, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!user) {
+    return res.status(404).json(sendError("User not found with that id", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: user,
+  });
 };

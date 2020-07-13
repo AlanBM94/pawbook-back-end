@@ -63,6 +63,11 @@ const AnimalSchema = mongoose.Schema({
     type: String,
     required: [true, "Animal must have a picture"],
   },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    required: [true, "Animal must have a user"],
+  },
 });
 
 const Animal = mongoose.model("Animal", AnimalSchema);
