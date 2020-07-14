@@ -1,7 +1,7 @@
 const User = require("./../models/userModel");
 const { validationResult } = require("express-validator");
-const { isAValidObjectId } = require("../utils/validations");
 const sendError = require("./../utils/appError");
+const factory = require("./handlerFactory");
 const jwt = require("jsonwebtoken");
 
 const signToken = (id) => {
@@ -68,55 +68,8 @@ exports.logIn = async (req, res) => {
   createSendToken(user, 200, res);
 };
 
-exports.getUserById = async (req, res, next) => {
-  const { id } = req.params;
+exports.getUserById = factory.findDocumentById(User);
 
-  if (!isAValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(sendError(`${id} is not a valid ObjectId`, 400));
-  }
+exports.updateUser = factory.updateDocument(User);
 
-  const user = await User.findById(id);
-
-  if (!user) {
-    res.status(404).json(sendError("User not found with that id", 404));
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: user,
-  });
-};
-
-exports.updateUser = async (req, res) => {
-  const { id } = req.params;
-
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
-  }
-
-  if (!isAValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(sendError(`${id} is not a valid ObjectId`, 400));
-  }
-
-  const userInfo = req.body;
-
-  const user = await User.findByIdAndUpdate(id, userInfo, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!user) {
-    return res.status(404).json(sendError("User not found with that id", 404));
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: user,
-  });
-};
+exports.deleteUser = factory.deleteDocument(User);

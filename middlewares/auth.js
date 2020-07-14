@@ -1,7 +1,9 @@
 const jwt = require("jsonwebtoken");
 const sendError = require("./../utils/appError");
+const User = require("./../models/userModel");
+// If the token's User does not belong to a user in the database sendError
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   const token = req.header("x-auth-token");
   if (!token) {
     return res
@@ -10,6 +12,18 @@ module.exports = (req, res, next) => {
   } else {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.find({ _id: decoded.id });
+
+      if (user.length === 0) {
+        return res
+          .status(401)
+          .json(
+            sendError(
+              "This token does not belong to any user in the database",
+              401
+            )
+          );
+      }
       req.user = decoded.id;
       next();
     } catch (error) {
