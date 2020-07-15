@@ -45,7 +45,8 @@ module.exports = {
     checkValidations("user", "string"),
     checkValidations("email", "email"),
   ],
-  updatePasswordValidations: [
+  changePasswordValidations: [
+    checkValidations("passwordCurrent", "string"),
     checkValidations("password", "string"),
     checkValidations("passwordConfirm", "string"),
   ],

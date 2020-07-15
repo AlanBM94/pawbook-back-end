@@ -5,7 +5,7 @@ const animalRouter = require("./routes/animalRoutes");
 const userRouter = require("./routes/userRoutes");
 const sendError = require("./utils/appError");
 
-// TODO: Add animals to each user document, make a factoryController
+// TODO: upload image
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

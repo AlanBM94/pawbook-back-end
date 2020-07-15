@@ -3,21 +3,47 @@ const userController = require("./../controllers/userController");
 const {
   signUpValidations,
   logInValidations,
-  updatePasswordValidations,
+  changePasswordValidations,
   updateUserValidations,
 } = require("./../utils/validations");
+const validation = require("./../middlewares/validateBody");
+
 const auth = require("./../middlewares/auth");
 
 const router = express.Router();
 
-router.get("/:id", auth, signUpValidations, userController.getUserById);
+router.post(
+  "/signup",
+  signUpValidations,
+  validation.checkIfBodyHasErrors,
+  userController.signUp
+);
 
-router.patch("/:id", auth, updateUserValidations, userController.updateUser);
+router.post(
+  "/signin",
+  logInValidations,
+  validation.checkIfBodyHasErrors,
+  userController.logIn
+);
 
-router.delete("/:id", auth, updateUserValidations, userController.deleteUser);
+router.get("/:id", auth, userController.getUserById);
 
-router.post("/signup", signUpValidations, userController.signUp);
+router.patch(
+  "/changepassword",
+  auth,
+  changePasswordValidations,
+  validation.checkIfBodyHasErrors,
+  userController.updatePassword
+);
 
-router.post("/signin", logInValidations, userController.logIn);
+router.patch(
+  "/:id",
+  auth,
+  updateUserValidations,
+  validation.checkIfBodyHasErrors,
+  userController.updateUser
+);
+
+router.delete("/:id", auth, userController.deleteUser);
 
 module.exports = router;

@@ -15,14 +15,7 @@ module.exports = async (req, res, next) => {
       const user = await User.find({ _id: decoded.id });
 
       if (user.length === 0) {
-        return res
-          .status(401)
-          .json(
-            sendError(
-              "This token does not belong to any user in the database",
-              401
-            )
-          );
+        return res.status(401).json(sendError("Token is not valid", 401));
       }
       req.user = decoded.id;
       next();
