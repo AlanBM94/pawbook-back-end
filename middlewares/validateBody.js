@@ -5,9 +5,10 @@ module.exports.checkIfBodyHasErrors = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json(sendError("Invalid inputs passed, please check your data.", 422));
+    return res.status(422).json({
+      status: 422,
+      errors,
+    });
   } else {
     return next();
   }

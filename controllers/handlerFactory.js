@@ -1,21 +1,16 @@
-const { isAValidObjectId } = require("../utils/validations");
 const sendError = require("./../utils/appError");
 const Animal = require("./../models/animalModel");
 
-exports.findDocumentById = (Model) => async (req, res) => {
+exports.findDocumentById = (Model) => async (req, res, next) => {
   const { id } = req.params;
-
-  if (!isAValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(sendError(`${id} is not a valid ObjectId`, 400));
-  }
 
   try {
     const document = await Model.findById(id);
 
     if (!document) {
-      res.status(404).json(sendError("Document not found with that id", 404));
+      return res
+        .status(404)
+        .json(sendError("Document not found with that id", 404));
     }
 
     res.status(200).json({
@@ -23,20 +18,12 @@ exports.findDocumentById = (Model) => async (req, res) => {
       data: document,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };
 
-exports.updateDocument = (Model) => async (req, res) => {
+exports.updateDocument = (Model) => async (req, res, next) => {
   const { id } = req.params;
-
-  if (!isAValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(sendError(`${id} is not a valid ObjectId`, 400));
-  }
 
   const documentInfo = req.body;
 
@@ -57,9 +44,7 @@ exports.updateDocument = (Model) => async (req, res) => {
       data: document,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };
 
@@ -73,14 +58,8 @@ const deleteAllAnimalsFromUser = async (userId) => {
   }
 };
 
-exports.deleteDocument = (Model) => async (req, res) => {
+exports.deleteDocument = (Model) => async (req, res, next) => {
   const { id } = req.params;
-
-  if (!isAValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(sendError(`${id} is not a valid ObjectId`, 400));
-  }
 
   try {
     const document = await Model.findByIdAndDelete(id);
@@ -102,8 +81,6 @@ exports.deleteDocument = (Model) => async (req, res) => {
       data: null,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };

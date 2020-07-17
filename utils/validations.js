@@ -21,7 +21,7 @@ module.exports = {
     checkValidations("name", "string"),
     checkValidations("scientificName", "string"),
     checkValidations("location", "string"),
-    checkValidations("weight", "number"),
+    checkValidations("weight", "string"),
     check("size.height", "height has to be a number").isNumeric(),
     check("size.longitud", "longitud has to be a number").isNumeric(),
     checkValidations("species", "string"),
@@ -32,7 +32,6 @@ module.exports = {
     checkValidations("numberOfSpecimensInFreedom", "number"),
     checkValidations("diet", "string"),
     checkValidations("association", "url"),
-    checkValidations("picture", "string"),
   ],
   isAValidObjectId: (id) => id.match(/^[0-9a-fA-F]{24}$/),
   signUpValidations: [

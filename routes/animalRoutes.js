@@ -4,10 +4,12 @@ const { animalValidations } = require("../utils/validations");
 const animalController = require("./../controllers/animalController");
 const auth = require("./../middlewares/auth");
 const validation = require("./../middlewares/validateBody");
+const fileUpload = require("./../middlewares/fileUpload");
 
 router.post(
   "/",
   auth,
+  fileUpload.single("image"),
   animalValidations,
   validation.checkIfBodyHasErrors,
   animalController.createAnimal

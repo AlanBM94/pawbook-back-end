@@ -59,9 +59,9 @@ const AnimalSchema = mongoose.Schema({
   association: {
     type: String,
   },
-  picture: {
+  image: {
     type: String,
-    required: [true, "Animal must have a picture"],
+    required: [true, "Animal must have a image"],
   },
   user: {
     type: mongoose.Schema.ObjectId,

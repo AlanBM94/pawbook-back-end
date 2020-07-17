@@ -3,33 +3,17 @@ const factory = require("./handlerFactory");
 const Animal = require("./../models/animalModel");
 const sendError = require("./../utils/appError");
 
-exports.createAnimal = async (req, res) => {
-  const animalInfo = req.body;
-
+exports.createAnimal = async (req, res, next) => {
   try {
-    const animalFoundedByName = await Animal.find({
-      name: animalInfo.name,
-    });
-
-    const animalFoundedByScientificName = await Animal.find({
-      scientificName: animalInfo.scientificName,
-    });
-
-    if (
-      animalFoundedByName.length > 0 ||
-      animalFoundedByScientificName.length > 0
-    ) {
-      return res
-        .status(409)
-        .json(
-          sendError(
-            "Document already exists, name and scientific name has to be unique",
-            409
-          )
-        );
-    }
+    const animalInfo = req.body;
 
     animalInfo.user = req.user;
+
+    if (req.file) {
+      animalInfo.image = req.file.path;
+    } else {
+      return res.status(400).json(sendError("Image has to be a file", 400));
+    }
 
     const newAnimal = await Animal.create(animalInfo);
 
@@ -38,9 +22,8 @@ exports.createAnimal = async (req, res) => {
       data: newAnimal,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    console.log("this is the error", error);
+    next(error);
   }
 };
 
@@ -71,14 +54,8 @@ exports.getAnimalsByEcosystem = async (req, res) => {
   }
 };
 
-exports.getAnimalsByUserId = async (req, res) => {
+exports.getAnimalsByUserId = async (req, res, next) => {
   const { id } = req.params;
-
-  if (!isAValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(sendError(`${id} is not a valid Object Id`, 400));
-  }
 
   try {
     const animals = await Animal.find({
@@ -90,8 +67,6 @@ exports.getAnimalsByUserId = async (req, res) => {
       data: animals,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };

@@ -23,39 +23,23 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-exports.signUp = async (req, res) => {
+exports.signUp = async (req, res, next) => {
   const userInfo = req.body;
 
   if (userInfo.password !== userInfo.passwordConfirm) {
     return res.status(400).json(sendError("Passwords are not the same", 400));
   }
 
-  if (userInfo.password.length <= 7 || userInfo.passwordConfirm.length <= 7) {
-    return res
-      .status(400)
-      .json(sendError("Password has to be at least 8 characters", 400));
-  }
-
   try {
-    const user = await User.find({ email: userInfo.email });
-
-    if (user.length > 0) {
-      return res
-        .status(409)
-        .json(sendError("User with that email already exists", 409));
-    }
-
     const newUser = await User.create(userInfo);
 
     createSendToken(newUser, 201, res);
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };
 
-exports.logIn = async (req, res) => {
+exports.logIn = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -69,13 +53,11 @@ exports.logIn = async (req, res) => {
 
     createSendToken(user, 200, res);
   } catch (error) {
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };
 
-exports.updatePassword = async (req, res) => {
+exports.updatePassword = async (req, res, next) => {
   try {
     const user = await User.findById(req.user).select("+password");
 
@@ -87,16 +69,6 @@ exports.updatePassword = async (req, res) => {
         .json(sendError("Current password is not correct", 401));
     }
 
-    if (req.body.password !== req.body.passwordConfirm) {
-      return res.status(401).json(sendError("Passwords are not the same", 401));
-    }
-
-    if (req.body.password.length <= 7 || req.body.passwordConfirm.length <= 7) {
-      return res
-        .status(400)
-        .json(sendError("Password has to be at least 8 characters", 400));
-    }
-
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
 
@@ -106,10 +78,7 @@ exports.updatePassword = async (req, res) => {
 
     createSendToken(user, 200, res);
   } catch (error) {
-    console.log("this is the error", error);
-    res
-      .status(500)
-      .json(sendError("Server error, please try later again", 500));
+    next(error);
   }
 };
 
