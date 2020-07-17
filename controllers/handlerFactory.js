@@ -1,5 +1,19 @@
 const sendError = require("./../utils/appError");
 const Animal = require("./../models/animalModel");
+const fs = require("fs");
+
+const getResource = (req) =>
+  req.originalUrl.split("/")[req.originalUrl.split("/").length - 2];
+
+const updateImageAndDeleteOldOne = async (req, document) => {
+  await fs.unlink(`${document.image}`, (err) => {
+    if (err) {
+      return next(err);
+    }
+  });
+  document.image = req.file.path;
+  await document.save();
+};
 
 exports.findDocumentById = (Model) => async (req, res, next) => {
   const { id } = req.params;
@@ -28,10 +42,16 @@ exports.updateDocument = (Model) => async (req, res, next) => {
   const documentInfo = req.body;
 
   try {
+    const resource = getResource(req);
+
     const document = await Model.findByIdAndUpdate(id, documentInfo, {
       new: true,
       runValidators: true,
     });
+
+    if (resource === "animals" && req.file) {
+      await updateImageAndDeleteOldOne(req, document);
+    }
 
     if (!document) {
       return res
@@ -44,6 +64,7 @@ exports.updateDocument = (Model) => async (req, res, next) => {
       data: document,
     });
   } catch (error) {
+    console.log("this is the error", error);
     next(error);
   }
 };
@@ -70,9 +91,7 @@ exports.deleteDocument = (Model) => async (req, res, next) => {
         .json(sendError("Document not found with that id", 404));
     }
 
-    const resource = req.originalUrl.split("/")[
-      req.originalUrl.split("/").length - 2
-    ];
+    const resource = getResource(req);
 
     if (resource === "users") deleteAllAnimalsFromUser(id);
 

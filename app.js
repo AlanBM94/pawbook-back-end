@@ -6,7 +6,7 @@ const userRouter = require("./routes/userRoutes");
 const sendError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 
-// TODO: upload image
+// TODO: implement security middlewares
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

@@ -20,6 +20,7 @@ router.get("/:id", animalController.getAnimalById);
 router.patch(
   "/:id",
   auth,
+  fileUpload.single("image"),
   animalValidations,
   validation.checkIfBodyHasErrors,
   animalController.updateAnimal
