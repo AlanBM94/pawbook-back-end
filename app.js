@@ -1,14 +1,24 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const mongooseSanatize = require("express-mongo-sanitize");
 const bodyParser = require("body-parser");
 const animalRouter = require("./routes/animalRoutes");
 const userRouter = require("./routes/userRoutes");
 const sendError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 
-// TODO: implement security middlewares
-
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(helmet());
+
+app.use(mongooseSanatize());
+
+app.use(xss());
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
